@@ -82,11 +82,38 @@ with app.app_context():
 @app.route('/predict', methods=['POST'])
 def api_predict():
     data = request.get_json()
-    json_path = data['json_path']
-    angle_label = data['angle_label']
+    raw_frames = data['frames']  # Pass frames directly instead of file path
+    # angle_label = data['angle_label']
+    angle_label = 'side'  # For now, I am doing this until I have a solid angle detection model.
 
-    result = predict_throw(json_path, angle_label)
+    # Modified prediction function
+    result = predict_throw_direct(raw_frames, angle_label)
     return jsonify(result)
+
+
+def predict_throw_direct(raw_frames, angle_label):
+    global model, label_map, angle_map, idx_to_label
+
+    normalized = normalize_all_frames(raw_frames)
+    sequence = build_sequence(
+        frames=normalized,
+        max_people=2,
+        target_len=60,
+        fill_mode="last"
+    )
+
+    # Rest of the prediction code remains the same
+    X = np.expand_dims(sequence, axis=0)
+    angle_index = np.array([[angle_map[angle_label]]])
+    probs = model.predict({"pose_input": X, "angle_input": angle_index})
+    predicted_class = int(np.argmax(probs))
+
+    return {
+        "predicted_label": idx_to_label[predicted_class],
+        "confidence": float(np.max(probs)),
+        "all_probs": probs.tolist()[0],
+        "class_index": predicted_class
+    }
 
 
 if __name__ == '__main__':
