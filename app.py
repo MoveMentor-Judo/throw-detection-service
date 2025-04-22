@@ -89,9 +89,11 @@ def initialize():
 with app.app_context():
     initialize()
 
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({"status": "healthy", "model_loaded": model is not None})
+
 
 @app.route('/predict', methods=['POST'])
 def api_predict():
@@ -133,4 +135,3 @@ def predict_throw_direct(raw_frames, angle_label):
 if __name__ == '__main__':
     load_resources()
     app.run(host='0.0.0.0', port=5000, debug=False)
-
