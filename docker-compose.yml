@@ -3,7 +3,7 @@ services:
   flask-app:
     build: .
     ports:
-      - "5000:5000"
+      - "5960:5000"
     volumes:
       - ./maps:/app/maps
       - ./models:/app/models

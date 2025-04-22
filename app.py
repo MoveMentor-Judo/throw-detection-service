@@ -22,7 +22,7 @@ def load_resources():
     global model, label_map, angle_map, idx_to_label, idx_to_angle
 
     # Get paths from environment variables with fallbacks
-    model_path = os.environ.get('MODEL_PATH', 'models/your_model.h5')
+    model_path = os.environ.get('MODEL_PATH', 'models/throw_detection_v0-1.keras')
     label_map_path = os.environ.get('LABEL_MAP_PATH', 'maps/label_map.json')
     angle_map_path = os.environ.get('ANGLE_MAP_PATH', 'maps/angle_map.json')
 
@@ -83,7 +83,7 @@ def initialize():
     model_path = "models/throw_detection_v0-1.keras"
     label_map_path = "maps/label_map.json"
     angle_map_path = "maps/angle_map.json"
-    load_resources(model_path, label_map_path, angle_map_path)
+    load_resources()
 
 
 with app.app_context():
