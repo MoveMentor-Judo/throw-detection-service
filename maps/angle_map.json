@@ -1,0 +1,6 @@
+{
+  "back": 0,
+  "diagonal": 1,
+  "front": 2,
+  "side": 3
+}
