@@ -1,4 +1,5 @@
 import json
+import os
 import numpy as np
 import tensorflow as tf
 from flask import Flask, request, jsonify
@@ -17,8 +18,17 @@ idx_to_angle = None
 
 
 # Load model and maps once at startup
-def load_resources(model_path, label_map_path, angle_map_path):
+def load_resources():
     global model, label_map, angle_map, idx_to_label, idx_to_angle
+
+    # Get paths from environment variables with fallbacks
+    model_path = os.environ.get('MODEL_PATH', 'models/your_model.h5')
+    label_map_path = os.environ.get('LABEL_MAP_PATH', 'maps/label_map.json')
+    angle_map_path = os.environ.get('ANGLE_MAP_PATH', 'maps/angle_map.json')
+
+    print(f"Loading model from: {model_path}")
+    print(f"Loading label map from: {label_map_path}")
+    print(f"Loading angle map from: {angle_map_path}")
 
     # Load model
     model = tf.keras.models.load_model(model_path, custom_objects={"SqueezeLayer": SqueezeLayer})
@@ -32,6 +42,8 @@ def load_resources(model_path, label_map_path, angle_map_path):
     # Invert label map for decoding
     idx_to_label = {v: k for k, v in label_map.items()}
     idx_to_angle = {v: k for k, v in angle_map.items()}
+
+    print("Resources loaded successfully!")
 
 
 # Prediction function that uses the global model
@@ -77,8 +89,10 @@ def initialize():
 with app.app_context():
     initialize()
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy", "model_loaded": model is not None})
 
-# API endpoint
 @app.route('/predict', methods=['POST'])
 def api_predict():
     data = request.get_json()
@@ -117,4 +131,6 @@ def predict_throw_direct(raw_frames, angle_label):
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    load_resources()
+    app.run(host='0.0.0.0', port=5000, debug=False)
+

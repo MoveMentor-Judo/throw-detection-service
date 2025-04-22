@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  flask-app:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./maps:/app/maps
+      - ./models:/app/models
+    environment:
+      - MODEL_PATH=/app/models/throw_detection_v0-1.keras
+      - LABEL_MAP_PATH=/app/maps/label_map.json
+      - ANGLE_MAP_PATH=/app/maps/angle_map.json
