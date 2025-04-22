@@ -6,8 +6,10 @@ from flask import Flask, request, jsonify
 from movenet_pre_processor.normalizer import normalize_all_frames
 from movenet_pre_processor.pre_processor import build_sequence
 from movenet_pre_processor.custom_layers import SqueezeLayer
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # Global variables to store the model and maps
 model = None
@@ -124,11 +126,19 @@ def predict_throw_direct(raw_frames, angle_label):
     probs = model.predict({"pose_input": X, "angle_input": angle_index})
     predicted_class = int(np.argmax(probs))
 
+    all_predictions = []
+    for idx, prob in enumerate(probs[0]):
+        all_predictions.append({
+            "label": idx_to_label[idx],
+            "probability": float(prob)
+        })
+    all_predictions = sorted(all_predictions, key=lambda x: x["probability"], reverse=True)
     return {
         "predicted_label": idx_to_label[predicted_class],
         "confidence": float(np.max(probs)),
-        "all_probs": probs.tolist()[0],
-        "class_index": predicted_class
+        "class_index": predicted_class,
+        "all_probs": probs.tolist()[0],  # Keep the original all_probs for backward compatibility
+        "predictions": all_predictions  # New field with labels and probabilities
     }
 
 
